@@ -1,17 +1,23 @@
-import { Module } from '@nestjs/common';
+import { HttpStatus, Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule, loggingMiddleware, providePrismaClientExceptionFilter } from 'nestjs-prisma';
 
 @Module({
   imports: [
+    PrismaModule.forRoot({
+      isGlobal: true,
+      prismaServiceOptions: {
+        middlewares: [loggingMiddleware()]
+      }
+    }),
     UsersModule, 
-    PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true
-    })
+    }),
+    AuthModule,
   ],
   controllers: [],
-  providers: [],
 })
 export class AppModule {}

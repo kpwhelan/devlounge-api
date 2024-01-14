@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create.user.dto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update.user.dto';
+import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +20,7 @@ export class UsersService {
             where: {
                 id,
             }
-        })
+        });
 
         return user;
     }
@@ -30,11 +30,11 @@ export class UsersService {
         const password = 'random_password';
         const hash = await bcrypt.hash(password, saltOrRounds);
 
-        try {
+        // try {
             const user = await this.prismaService.user.create({
                 data: {
-                    firstName: dto.firstName.toUpperCase(),
-                    lastName: dto.lastName.toUpperCase(),
+                    firstName: dto.firstName,
+                    lastName: dto.lastName,
                     email: dto.email,
                     password: hash,
                     title: dto.title,
@@ -49,9 +49,9 @@ export class UsersService {
             })
 
             return user;
-        } catch (e) {
-            console.log(e)
-        }
+        // } catch (e) {
+        //     console.log(e)
+        // }
     }
 
     async updateUser(id: number, dto: UpdateUserDto) {
@@ -60,5 +60,15 @@ export class UsersService {
             where: {id},
             data: dto
         })
+    }
+
+    async deleteUser(id: number) {
+        const result = this.prismaService.user.delete({
+            where: {
+                id: id
+            }
+        })
+
+        return result;
     }
 }

@@ -6,7 +6,7 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NULL,
-    `aboutMe` LONGTEXT NULL,
+    `aboutMe` TEXT NULL,
     `profilePictureUrl` VARCHAR(191) NULL,
     `githubUrl` VARCHAR(191) NULL,
     `linkedinUrl` VARCHAR(191) NULL,

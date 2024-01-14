@@ -17,7 +17,7 @@ model User {
   email String @unique
   password String
   title String?
-  aboutMe String? @db.LongText
+  aboutMe String? @db.Text
   profilePictureUrl String?
   githubUrl String?
   linkedinUrl String?
