@@ -25,9 +25,19 @@ export class UsersService {
         return user;
     }
 
+    async findUserByEmail(email: string) {
+        const user = await this.prismaService.user.findUnique({
+            where: {
+                email,
+            }
+        });
+
+        return user;
+    }
+
     async createUser(dto: CreateUserDto): Promise<User> {
         const saltOrRounds = 10;
-        const password = 'random_password';
+        const password = dto.password;
         const hash = await bcrypt.hash(password, saltOrRounds);
 
         // try {
