@@ -15,21 +15,25 @@ export class UsersController {
       return this.usersService.getAllUsers();
     }
 
+    @UseGuards(AuthenticatedGuard)
     @Get(':id')
     findById(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.findUserById(id);
     }
 
+    @UseGuards(AuthenticatedGuard)
     @Post()
     createUser(@Body() dto: CreateUserDto) {
         return this.usersService.createUser(dto);
     }
 
+    @UseGuards(AuthenticatedGuard)
     @Patch(':id')
     updateUser(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
         return this.usersService.updateUser(id, dto);
     }
 
+    @UseGuards(AuthenticatedGuard)
     @Delete(':id')
     deleteUser(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.deleteUser(id);
