@@ -3,6 +3,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule, loggingMiddleware, providePrismaClientExceptionFilter } from 'nestjs-prisma';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PrismaModule, loggingMiddleware, providePrismaClientExceptionFilter } f
       isGlobal: true
     }),
     AuthModule,
+    PostsModule,
   ],
   controllers: [],
 })
