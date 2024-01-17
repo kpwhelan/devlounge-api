@@ -1,14 +1,15 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { isArray } from 'class-validator';
+import { AuthenticatedGuard } from 'src/auth/guards/authenticated.auth.guard';
 
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
+    @UseGuards(AuthenticatedGuard)
     @Get()
     getAllUsers() {
       return this.usersService.getAllUsers();

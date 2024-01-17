@@ -1,36 +1,68 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create.user.dto';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { GenericServerException } from 'src/exceptions/generic-server.exception';
+import { EmailTakenException } from 'src/exceptions/email-taken.exception';
 
 @Injectable()
 export class UsersService {
     constructor(private prismaService: PrismaService) {}
 
-    async getAllUsers() {
-        const users = await this.prismaService.user.findMany();
+    private readonly logger = new Logger(UsersService.name)
 
-        return users;
+    async getAllUsers() { 
+        try {
+            const users = await this.prismaService.user.findMany();
+
+            return users;
+        } catch(e) {
+            this.logger.error(e);
+
+            throw new GenericServerException;
+        }
     }
 
     async findUserById(id: number) {
-        const user = await this.prismaService.user.findUnique({
-            where: {
-                id,
-            }
-        });
+        try {
+            const user = await this.prismaService.user.findUnique({
+                where: {
+                    id,
+                }
+            });
 
-        return user;
+            return user;
+        } catch(e) {
+            this.logger.error(e);
+
+            throw GenericServerException;
+        }
+    }
+
+    async findUserByEmail(email: string) {
+        try {
+            const user = await this.prismaService.user.findUnique({
+                where: {
+                    email,
+                }
+            });
+
+            return user;
+        } catch(e) {
+            this.logger.error(e);
+
+            throw new GenericServerException;
+        }
     }
 
     async createUser(dto: CreateUserDto): Promise<User> {
         const saltOrRounds = 10;
-        const password = 'random_password';
+        const password = dto.password;
         const hash = await bcrypt.hash(password, saltOrRounds);
 
-        // try {
+        try {
             const user = await this.prismaService.user.create({
                 data: {
                     firstName: dto.firstName,
@@ -49,26 +81,52 @@ export class UsersService {
             })
 
             return user;
-        // } catch (e) {
-        //     console.log(e)
-        // }
+        } catch (e) {
+            this.logger.error(e);
+
+            if (e instanceof Prisma.PrismaClientKnownRequestError) {
+                switch(e.code) {
+                    case "P2002": {
+                        throw new EmailTakenException;
+                    }
+                    default: {
+                        throw new GenericServerException;
+                    }
+                }
+            }
+        }
     }
 
     async updateUser(id: number, dto: UpdateUserDto) {
-        //returns user object
-        return await this.prismaService.user.update({
-            where: {id},
-            data: dto
-        })
+        try {
+            return await this.prismaService.user.update({
+                where: {id},
+                data: dto
+            })
+        } catch(e) {
+            this.logger.error(e);
+
+            if (e instanceof Prisma.PrismaClientKnownRequestError) {
+                if (e.code === 'P2002') throw new EmailTakenException
+            } else {
+                throw new GenericServerException;
+            }
+        }
     }
 
     async deleteUser(id: number) {
-        const result = this.prismaService.user.delete({
-            where: {
-                id: id
-            }
-        })
+        try {
+            const result = this.prismaService.user.delete({
+                where: {
+                    id: id
+                }
+            })
+    
+            return result;
+        } catch(e) {
+            this.logger.error(e);
 
-        return result;
+            throw new GenericServerException;
+        }
     }
 }
